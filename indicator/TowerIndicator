@@ -1,0 +1,24 @@
+inputs:
+Length(3);
+ 
+variables:
+Index(0),
+HV(0), LV(0),
+BarColor(0);
+ 
+HV = High[1];
+LV = Low[1];
+ 
+for Index = 2 to Length
+begin
+if HV < High[Index] then HV = High[Index];
+if LV > Low[Index]  then LV = Low[Index];
+end;
+ 
+if Close > HV then // Red Bar
+BarColor = Red
+else
+if Close < LV then // Green Bar
+BarColor = Green;
+ 
+PlotPaintBar(Close[1], Close, "Tower Line", BarColor, Black, 4);

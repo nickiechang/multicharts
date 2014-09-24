@@ -1,0 +1,32 @@
+inputs: 
+Length(3),StopLoss(30);
+
+variables:
+Index(0),
+HV(0), LV(0),
+BarColor(0);
+ 
+HV = High[1];
+LV = Low[1];
+ 
+for Index = 2 to Length
+begin
+if HV < High[Index] then HV = High[Index];
+if LV > Low[Index]  then LV = Low[Index];
+end;
+ 
+if Close > HV then // Red Bar
+begin
+  BarColor = Red;
+  if BarColor[1] = Green then
+    buy next bar at market;
+end
+else 
+if Close < LV then // Green Bar
+begin
+  BarColor = Green;
+  if BarColor[1] = Red then
+    sellshort next bar at market;
+end;
+
+setstoploss(StopLoss*200);

@@ -1,0 +1,79 @@
+inputs:   
+RSILength( 8 ) , 
+Strength( 5 ),  
+Length( 90 ) , 
+PlotSeries( 1 ) ;  // 1 for Plot Series Stream 1, 2 for Plot Series Stream 2 
+
+variables: 
+RSIVal( 0 ) , 
+BullDivergence( False ), 
+BearDivergence( False ), 
+oSw1Series1( 0 ),  
+oSw1Series2( 0 ),  
+oSw2Series1( 0 ),  
+oSw2Series2( 0 ),  
+oSw1Series3( 0 ),  
+oSw1Series4( 0 ),  
+oSw2Series3( 0 ),  
+oSw2Series4( 0 ),  
+oSw1BarSeries1( 0 ) ,  
+oSw1BarSeries2( 0 ) ,  
+oSw2BarSeries1( 0 ) ,  
+oSw2BarSeries2( 0 ) ,  
+oSw1BarSeries3( 0 ) ,  
+oSw1BarSeries4( 0 ) ,  
+oSw2BarSeries3( 0 ) ,  
+oSw2BarSeries4( 0 ) ,  
+HiLo( 0 ) , { pass in 1 for BearishDiv (based on SwingHighs), -1 for  
+BullishDiv (based on SwingLows) } 
+TL_IDBull( 0 ) , 
+TL_IDBear( 0 ) ; 
+
+RSIVal = RSI( Close, RSILength ) ;
+
+BullDivergence = False ; 
+BearDivergence = False ; 
+
+HiLo = 1 ; 
+//Most recent Price Pivot High 
+Value1 = Pivot( High, Length, Strength, Strength, 1, HiLo, oSw1Series1, oSw1BarSeries1 ) ; 
+//Most recent RSIVal Pivot High 
+Value2 = Pivot( RSIVal, Length, Strength, Strength, 1, HiLo, oSw1Series2, oSw1BarSeries2 ) ; 
+//Second most recent Price Pivot High 
+Value3 = Pivot( High, Length, Strength, Strength, 2, HiLo, oSw2Series1, oSw2BarSeries1 ) ; 
+//Second most recent RSIVal Pivot High 
+Value4 = Pivot( RSIVal, Length, Strength, Strength, 2, HiLo, oSw2Series2, oSw2BarSeries2 ) ; 
+
+HiLo = -1 ; 
+//Most recent Price Pivot Low 
+Value5 = Pivot( Low, Length, Strength, Strength, 1, HiLo, oSw1Series3, oSw1BarSeries3 ) ; 
+//Most recent RSIVal Pivot Low 
+Value6 = Pivot( RSIVal, Length, Strength, Strength, 1, HiLo, oSw1Series4, oSw1BarSeries4 ) ; 
+//Second most recent Price Pivot Low 
+Value7 = Pivot( Low, Length, Strength, Strength, 2, HiLo, oSw2Series3, oSw2BarSeries3 ) ; 
+//Second most recent RSIVal Pivot Low 
+Value8 = Pivot( RSIVal, Length, Strength, Strength, 2, HiLo, oSw2Series4, oSw2BarSeries4 ) ; 
+
+if  Value3 = 1 { pivot found; this automatically implies that Value1 also 1 } 
+ and Value4 = 1 { pivot found; this automatically implies that Value2 also 1 } and  
+ ( oSw1Series1 > oSw2Series1 and oSw1Series2 < oSw2Series2 ) and 
+ AbsValue( oSw2BarSeries1 - oSw2BarSeries2) <= 5 then 
+  BearDivergence = True ;  
+ 
+if  Value7 = 1 { pivot found; this automatically implies that Value5 also 1 } 
+ and Value8 = 1 { pivot found; this automatically implies that Value6 also 1 } and  
+ ( oSw1Series3 < oSw2Series3 and oSw1Series4 > oSw2Series4 ) and 
+AbsValue( oSw2BarSeries3 - oSw2BarSeries4) <= 5 then 
+  BullDivergence = True ; 
+ 
+if BearDivergence and BearDivergence[1] = False then 
+  sellshort next bar at market;
+ 
+if BullDivergence and BullDivergence[1] = False then 
+  buy next bar at market;
+  
+if marketposition > 0 and RSIVal > 70 then
+  sell next bar at market;
+  
+if marketposition < 0 and RSIVal < 30 then
+  buytocover next bar at market;

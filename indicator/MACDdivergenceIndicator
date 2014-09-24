@@ -1,0 +1,130 @@
+inputs:   
+MACDFastLength( 12 ) , 
+MACDSlowLength( 26 ) , 
+MACDAvgLength( 9 ) , 
+Strength( 5 ),  
+Length( 90 ) , 
+PlotSeries( 1 ) ;  // 1 for Plot Series Stream 1, 2 for Plot Series Stream 2 
+
+variables: 
+MACDVal( 0 ) , 
+MACDAvg( 0 ) , 
+MACDDiff( 0 ) , 
+BullDivergence( False ), 
+BearDivergence( False ), 
+oSw1Series1( 0 ),  
+oSw1Series2( 0 ),  
+oSw2Series1( 0 ),  
+oSw2Series2( 0 ),  
+oSw1Series3( 0 ),  
+oSw1Series4( 0 ),  
+oSw2Series3( 0 ),  
+oSw2Series4( 0 ),  
+oSw1BarSeries1( 0 ) ,  
+oSw1BarSeries2( 0 ) ,  
+oSw2BarSeries1( 0 ) ,  
+oSw2BarSeries2( 0 ) ,  
+oSw1BarSeries3( 0 ) ,  
+oSw1BarSeries4( 0 ) ,  
+oSw2BarSeries3( 0 ) ,  
+oSw2BarSeries4( 0 ) ,  
+HiLo( 0 ) , { pass in 1 for BearishDiv (based on SwingHighs), -1 for  
+BullishDiv (based on SwingLows) } 
+TL_IDBull( 0 ) , 
+TL_IDBear( 0 ) ; 
+
+MACDVal = MACD( Close , MACDFastLength, MACDSlowLength ) ;  
+MACDAvg = XAverage( MACDVal, MACDAvgLength ) ; 
+MACDDiff = MACDVal - MACDAvg ; 
+
+BullDivergence = False ; 
+BearDivergence = False ; 
+
+HiLo = 1 ; 
+//Most recent Price Pivot High 
+Value1 = Pivot( High, Length, Strength, Strength, 1, HiLo, oSw1Series1, oSw1BarSeries1 ) ; 
+//Most recent MACDDiff Pivot High 
+Value2 = Pivot( MACDDiff, Length, Strength, Strength, 1, HiLo, oSw1Series2, oSw1BarSeries2 ) ; 
+//Second most recent Price Pivot High 
+Value3 = Pivot( High, Length, Strength, Strength, 2, HiLo, oSw2Series1, oSw2BarSeries1 ) ; 
+//Second most recent MACDDiff Pivot High 
+Value4 = Pivot( MACDDiff, Length, Strength, Strength, 2, HiLo, oSw2Series2, oSw2BarSeries2 ) ; 
+
+HiLo = -1 ; 
+//Most recent Price Pivot Low 
+Value5 = Pivot( Low, Length, Strength, Strength, 1, HiLo, oSw1Series3, oSw1BarSeries3 ) ; 
+//Most recent MACDDiff Pivot Low 
+Value6 = Pivot( MACDDiff, Length, Strength, Strength, 1, HiLo, oSw1Series4, oSw1BarSeries4 ) ; 
+//Second most recent Price Pivot Low 
+Value7 = Pivot( Low, Length, Strength, Strength, 2, HiLo, oSw2Series3, oSw2BarSeries3 ) ; 
+//Second most recent MACDDiff Pivot Low 
+Value8 = Pivot( MACDDiff, Length, Strength, Strength, 2, HiLo, oSw2Series4, oSw2BarSeries4 ) ; 
+
+//Plot divergence zones 
+if  Value1 = 1 { most recent price pivot high found } 
+and Value2 = 1 { most recent MACD pivot high found } and  
+( High > oSw1Series1 and MACDDiff < oSw1Series2 ) and 
+  AbsValue( oSw1BarSeries1 - oSw1BarSeries2) <= 5 then 
+  if PlotSeries = 1 then 
+   plot1( High ) 
+  else 
+   plot1( MACDDiff ) ; 
+    
+if  Value5 = 1 { most recent price pivot low found } 
+ and Value6 = 1 { most recent MACD pivot low found } and  
+ ( Low < oSw1Series3 and MACDDiff > oSw1Series4 ) and 
+AbsValue( oSw1BarSeries3 - oSw1BarSeries4) <= 5 then 
+  if PlotSeries = 1 then 
+   plot2( Low ) 
+  else 
+   plot2( MACDDiff ) ; 
+ 
+if  Value3 = 1 { pivot found; this automatically implies that Value1 also 1 } 
+ and Value4 = 1 { pivot found; this automatically implies that Value2 also 1 } and  
+ ( oSw1Series1 > oSw2Series1 and oSw1Series2 < oSw2Series2 ) and 
+ AbsValue( oSw2BarSeries1 - oSw2BarSeries2) <= 5 then 
+  BearDivergence = True ;  
+ 
+if  Value7 = 1 { pivot found; this automatically implies that Value5 also 1 } 
+ and Value8 = 1 { pivot found; this automatically implies that Value6 also 1 } and  
+ ( oSw1Series3 < oSw2Series3 and oSw1Series4 > oSw2Series4 ) and 
+AbsValue( oSw2BarSeries3 - oSw2BarSeries4) <= 5 then 
+  BullDivergence = True ; 
+ 
+if BearDivergence and BearDivergence[1] = False then 
+ if PlotSeries = 1 then 
+  begin 
+  TL_IDBear = TL_New( Date[oSw2BarSeries1], Time[oSw2BarSeries1], oSw2Series1, Date[oSw1BarSeries1], Time[oSw1BarSeries1], oSw1Series1 ) ; 
+  TL_SetColor(TL_IDBear, Red ) ; 
+  TL_SetSize(TL_IDBear, 2 ) ; 
+  end  
+ else 
+  begin 
+  TL_IDBear = TL_New_self( Date[oSw2BarSeries2], Time[oSw2BarSeries2], oSw2Series2, Date[oSw1BarSeries2], Time[oSw1BarSeries2], oSw1Series2 ) ; 
+  TL_SetColor(TL_IDBear, Red ) ; 
+  TL_SetSize(TL_IDBear, 2 ) ; 
+  //value20 = arw_new( Date[oSw1BarSeries2], Time[oSw1BarSeries2], oSw1Series1, true );
+  end ; 
+ 
+if BullDivergence and BullDivergence[1] = False then 
+ if PlotSeries = 1 then 
+  begin 
+  TL_IDBull = TL_New( Date[oSw2BarSeries3], Time[oSw2BarSeries3], oSw2Series3, Date[oSw1BarSeries3], Time[oSw1BarSeries3], oSw1Series3 ) ; 
+  TL_SetColor(TL_IDBull, Cyan ) ; 
+  TL_SetSize(TL_IDBull, 2 ) ; 
+  end  
+ else 
+  begin 
+  TL_IDBull = TL_New_self( Date[oSw2BarSeries4], Time[oSw2BarSeries4], oSw2Series4, Date[oSw1BarSeries4], Time[oSw1BarSeries4], oSw1Series4 ) ; 
+  TL_SetColor(TL_IDBull, Cyan ) ; 
+  TL_SetSize(TL_IDBull, 2 ) ; 
+  //value20 = arw_new( Date[oSw1BarSeries4], Time[oSw1BarSeries4], oSw1Series3, false );
+  end ; 
+ 
+if PlotSeries = 2 then 
+begin 
+ Plot4( MACDVal );
+ Plot5( MACDAvg);
+ Plot3( MACDDiff, "MACDDiff" ) ;
+end;
+

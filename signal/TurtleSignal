@@ -1,0 +1,148 @@
+vars: N(0),StopLoss(1),DV(0),BB(0),AccountBalance(0),DollarRisk(0),LTT(0),
+Tracker(0),LastTrade(0),HBP(0),LBP(0);
+{/// Turtle 20-Day Breakout Replica //////////////////////////////////////}
+if marketposition = 0 then begin
+BB = 0;
+N = AvgTrueRange(20);
+AccountBalance = 1000000;
+
+{ ? 20? K???????????????? DV ,??DV????????????}
+DV = N * BigPointValue;
+{AccountBalance = InitialBalance + netprofit;}
+
+{ ???????????????? }
+DollarRisk = AccountBalance * 0.01;
+LTT = IntPortion(DollarRisk/DV);
+
+{ ??? }
+StopLoss = 2 * DV * LTT;
+
+if LastTrade = -1 then begin
+{ ?????? 20?K? ?????????? }
+buy LTT shares next bar highest(h,20) or higher;
+
+{ ??? 0.5????? (N) ???? , ????}
+buy LTT shares next bar highest(h,20) + (0.5*N) or higher;
+buy LTT shares next bar highest(h,20) + (1.0*N) or higher;
+buy LTT shares next bar highest(h,20) + (1.5*N) or higher;
+
+{ ?????? 20?K? ?????????? }
+sellshort LTT shares next bar lowest(l,20) or lower;
+
+{ ??? 0.5????? (N) ???? , ????}
+sellshort LTT shares next bar lowest(l,20) - (0.5*N) or lower;
+sellshort LTT shares next bar lowest(l,20) - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,20) - (1.5*N) or lower;
+end;
+
+if LastTrade = 1 then begin
+buy LTT shares next bar highest(h,50) or higher;
+buy LTT shares next bar highest(h,50) + (0.5*N) or higher;
+buy LTT shares next bar highest(h,50) + (1.0*N) or higher;
+buy LTT shares next bar highest(h,50) + (1.5*N) or higher;
+
+sellshort LTT shares next bar lowest(l,50) or lower;
+sellshort LTT shares next bar lowest(l,50) - (0.5*N) or lower;
+sellshort LTT shares next bar lowest(l,50) - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,50) - (1.5*N) or lower;
+end;
+end;
+
+{// PREVIOUS TRADE TRACKER}
+if HBP = 0 and h > highest(h,19)[1] then begin
+Tracker = 1; HBP = h; LBP = 0;
+end;
+
+if LBP = 0 and l < lowest(l,19)[1] then begin
+Tracker = -1; LBP = l; HBP = 0;
+end;
+
+if Tracker = 1 then begin
+if l < HBP - (2*N) then LastTrade = -1;
+if h > HBP + (4*N) then LastTrade = 1;
+end;
+
+if Tracker = -1 then begin
+if h > LBP + (2*N) then LastTrade = -1;
+if l < LBP - (4*N) then LastTrade = 1;
+end;
+
+{// LONG 20 }
+if LastTrade = -1 and marketposition = 1 then begin
+BB = BB + 1;
+if currentcontracts = LTT then begin
+buy LTT shares next bar highest(h,20)[BB] + (0.5*N) or higher;
+buy LTT shares next bar highest(h,20)[BB] + (1.0*N) or higher;
+buy LTT shares next bar highest(h,20)[BB]+ (1.5*N) or higher;
+end;
+
+if currentcontracts = LTT * 2 then begin
+buy LTT shares next bar highest(h,20)[BB] + (1.0*N) or higher;
+buy LTT shares next bar highest(h,20)[BB] + (1.5*N) or higher;
+end;
+
+if currentcontracts = LTT * 3 then
+buy LTT shares next bar highest(h,20)[BB] + (1.5*N) or higher;
+end;
+
+{// LONG 50}
+if LastTrade = 1 and marketposition = 1 then begin
+BB = BB + 1;
+if currentcontracts = LTT then begin
+buy LTT shares next bar highest(h,50)[BB] + (0.5*N) or higher;
+buy LTT shares next bar highest(h,50)[BB] + (1.0*N) or higher;
+buy LTT shares next bar highest(h,50)[BB]+ (1.5*N) or higher;
+end;
+
+if currentcontracts = LTT * 2 then begin
+buy LTT shares next bar highest(h,50)[BB] + (1.0*N) or higher;
+buy LTT shares next bar highest(h,50)[BB] + (1.5*N) or higher;
+end;
+
+if currentcontracts = LTT * 3 then
+buy LTT shares next bar highest(h,50)[BB] + (1.5*N) or higher;
+end;
+sell("out-S") next bar lowest(l,10) or lower;
+
+{// SHORT 20 }
+if LastTrade = -1 and marketposition = -1 then begin
+BB = BB + 1;
+if currentcontracts = LTT then begin
+sellshort LTT shares next bar lowest(l,20)[BB] - (0.5*N) or lower;
+sellshort LTT shares next bar lowest(l,20)[BB] - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,20)[BB] - (1.5*N) or lower;
+end;
+
+if currentcontracts = LTT * 2 then begin
+sellshort LTT shares next bar lowest(l,20)[BB] - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,20)[BB] - (1.5*N) or lower;
+end;
+
+if currentcontracts = LTT * 3 then
+sellshort LTT shares next bar lowest(l,20)[BB] - (1.5*N) or lower;
+end;
+
+{// SHORT 55 }
+if LastTrade = 1 and marketposition = -1 then begin
+BB = BB + 1;
+if currentcontracts = LTT then begin
+sellshort LTT shares next bar lowest(l,50)[BB] - (0.5*N) or lower;
+sellshort LTT shares next bar lowest(l,50)[BB] - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,50)[BB] - (1.5*N) or lower;
+end;
+
+if currentcontracts = LTT * 2 then begin
+sellshort LTT shares next bar lowest(l,50)[BB] - (1.0*N) or lower;
+sellshort LTT shares next bar lowest(l,50)[BB] - (1.5*N) or lower;
+end;
+
+if currentcontracts = LTT * 3 then
+sellshort LTT shares next bar lowest(l,50)[BB] - (1.5*N) or lower;
+end;
+buytocover ("out-B") next bar highest(h,10) or higher;
+
+{// STOPS}
+if currentcontracts = (2 * LTT) then StopLoss = DV * 3.5 * LTT;
+if currentcontracts = (3 * LTT) then StopLoss = DV * 4.5 * LTT;
+if currentcontracts = (4 * LTT) then StopLoss = DV * 5.0 * LTT;
+setstoploss (StopLoss);

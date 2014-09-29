@@ -1,0 +1,49 @@
+Inputs: CCI_Len(10),UpBand(100),DnBand(100),ATR_Len(10),ATR_Ratio(1.5),Stop_Ratio(2.0),NBarL(20),NBarS(20),TradeStopLoss(0.03),TradeProfit(0.05);
+
+Var:AveTR(0),Ubuy(0),Usell(0),BuyStop(0),SellStop(0);
+Var:VarL1(0),VarS1(0),EntCondL(false),EntCondS(false);
+Var: IsBalanceDay(False),MP(0),PF(0),PL(0);
+
+MP = MarketPosition ;
+
+if DAYofMonth(Date) > 14 and DAYofMonth(Date) < 22 and DAYofWeek(Date)= 3 then isBalanceDay = True else isBalanceDay =False ;
+
+PF = AvgPrice*TradeProfit ;
+PL = AvgPrice*TradeStopLoss ;
+
+{ Average true range }
+AveTR = Average(TrueRange, ATR_Len);
+
+{ Entry prices }
+Ubuy = Close[1] + ATR_Ratio * AveTR;
+Usell = Close[1] - ATR_Ratio * AveTR;
+
+{ Entry and exit conditions }
+VarL1 = CCI(CCI_Len);
+VarS1 = CCI(CCI_Len);
+
+EntCondL = VarL1 > UpBand;
+EntCondS = VarS1 < -DnBand;
+
+If EntCondL then Buy next bar at Ubuy stop;
+If EntCondS then Sellshort next bar at Usell stop;
+
+If MP > 0 then begin
+If BarsSinceEntry = 0 then begin
+BuyStop = EntryPrice - Stop_Ratio * AveTR;
+end;
+
+If BarsSinceEntry >= NBarL then Sell next bar at market;
+Sell next bar at BuyStop stop;
+end;
+
+If MP < 0 then begin
+If BarsSinceEntry = 0 then begin
+SellStop = EntryPrice + Stop_Ratio * AveTR;
+end;
+
+If BarsSinceEntry >= NBarS then Buytocover next bar at market;
+Buytocover next bar at SellStop stop;
+end;
+
+if IsBalanceDay then setExitonClose ;

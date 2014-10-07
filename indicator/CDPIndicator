@@ -1,0 +1,13 @@
+variables:cdp(0),ah(0),nh(0),nl(0),al(0);
+
+cdp = (highD(1)+lowD(1)+2*closeD(1))/4;
+ah = cdp + (highD(1) - lowD(1));
+nh = cdp*2 - lowD(1);
+nl = cdp*2 - highD(1);
+al = cdp - (highD(1) - lowD(1));
+
+plot1(ah);
+plot2(nh);
+plot3(cdp);
+plot4(nl);
+plot5(al);

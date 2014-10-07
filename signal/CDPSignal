@@ -1,0 +1,51 @@
+input:stoploss(0.005);
+variables:cdp(0),ah(0),nh(0),nl(0),al(0),longcount(0),shortcount(0);
+
+if time = 0850 then
+begin
+cdp = (highD(1)+lowD(1)+2*closeD(1))/4;
+ah = cdp + (highD(1) - lowD(1));
+nh = cdp*2 - lowD(1);
+nl = cdp*2 - highD(1);
+al = cdp - (highD(1) - lowD(1));
+longcount = 0;
+shortcount = 0;
+end;
+
+if (marketposition = -1 or marketposition = 0) and time > 0850 and time < 1315 and cdp > 0 and longcount = 0 then
+begin
+    buy("CDP_B") 1 contracts next bar at ah stop;
+    //if close cross over ah then buy("CDP_B") 1 contracts next bar at market;
+end;
+
+if (marketposition = 1 or marketposition = 0) and time > 0850 and time < 1315 and cdp > 0 and shortcount = 0 then
+begin
+    sellshort("CDP_S") 1 contracts next bar at al stop;
+    //if close cross under al then sellshort("CDP_S") 1 contracts next bar at market;
+end;
+
+if marketposition= 1 then begin longcount = 1;  end;
+if marketposition=-1 then begin shortcount= 1;  end;
+
+if marketposition= 1 then sell("Takelong") next bar at nh stop;
+if marketposition=-1 then buytocover("Takeshort") next bar at nl stop;
+
+if marketposition= 1 then 
+begin
+    sell("Stoplong") 1 contracts next bar at entryprice*(1-stoploss) stop;
+end;
+if marketposition=-1 then
+begin
+    buytocover("Stopshort") 1 contracts next bar at entryprice*(1+stoploss) stop;
+end;
+
+if time = 1325 then 
+begin
+    sell("exitLong") next bar at market;
+    buytocover("exitShort") next bar at market;
+    cdp = 0;
+    ah = 0;
+    nh = 0;
+    nl = 0;
+    al = 0;
+end;

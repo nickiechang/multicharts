@@ -1,0 +1,17 @@
+inputs: percentage(10);
+
+if time > 0855 and time < 0900 and marketposition = 0 then begin
+    if close > CloseD(1)*(1+percentage*0.001) then begin
+        sellshort next bar at market;
+    end;
+    if close < CloseD(1)*(1-percentage*0.001) then begin
+        buy next bar at market;
+    end;
+end;
+
+if time > 1325 and marketposition > 0 then
+    sell next bar at market;
+    
+if time > 1325 and marketposition < 0 then
+    buytocover next bar at market; 
+    

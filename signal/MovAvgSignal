@@ -1,0 +1,61 @@
+inputs:  Price( Close ), 
+         MovAvgLength( 1150 ), 
+         StdDevLength( 1150 ), 
+         Buffer( 50 ) ,
+         StdMultiply( 2 ),
+         PreviousBars( 90);
+variables:  MovAvg( 0 ), 
+            StdDevValue( 0 ),
+            BullTrend( True ),
+            IsBalanceDay( True ),
+            TopBand( 0 ),
+            BotBand( 0 ),
+            BuyPrice( 0 ),
+            SellPrice( 0 ),
+            HBP( 0 ),
+            LBP( 0 );
+            
+MovAvg = AverageFC( Price, MovAvgLength ) ;
+
+//MovAvg = XAverage( Price, MovAvgLength ) ;
+StdDevValue = StandardDev( MovAvg, StdDevLength, 1 );
+TopBand = MovAvg + StdDevValue*StdMultiply;
+BotBand = MovAvg - StdDevValue*StdMultiply;
+
+BullTrend = MovAvg > MovAvg[1];
+IsBalanceDay = (dayofweek(date)=3 and dayofmonth(date) > 14 and 22 > dayofmonth(date)) or date=1040127 or date=1070226 or date=1100617 or date=1100222; 
+
+if StdDevValue > Buffer then
+begin
+    BuyPrice = MovAvg+Buffer;
+    SellPrice = MovAvg-Buffer;
+end
+else
+begin
+    BuyPrice = TopBand;
+    SellPrice = BotBand;
+end;
+
+HBP = highest(High,PreviousBars);
+LBP = lowest(Low,PreviousBars);
+{
+value2=0;
+for value1 = 1 to 20 begin
+    value2 = value2 + CloseD(value1);
+end;
+value3=value2/20;
+}
+
+if close > MovAvg and marketposition = 0 then
+    buy next bar at HBP+1 stop;
+    
+if close <MovAvg and marketposition = 0 then
+    sellshort next bar at LBP-1 stop;
+
+if marketposition > 0 then
+    sell next bar at MovAvg stop;
+    
+if marketposition < 0 then
+    buytocover next bar at MovAvg stop;
+    
+if IsBalanceDay then SetExitonClose ;

@@ -1,0 +1,47 @@
+inputs:  Price( Close ), Length( 9 ), Displace( 0 ),StdDevMultiply( 2 ),PreviousBars( 90 ) ;
+variables:  var0( 0 ),var1( 0 ) ;
+	
+var0 = AverageFC( Price, Length ) ;
+//var0 = XAverage( Price, Length ) ;
+var1 = StandardDev( var0, Length, 1 );
+
+plot3(var0+var1*StdDevMultiply, "up");
+plot4(var0-var1*StdDevMultiply, "down");
+plot5(highest(High,PreviousBars), "prevh");
+plot6(lowest(Low,PreviousBars), "prevl");
+
+{
+value2=0;
+for value1 = 1 to 50 begin
+    value2 = value2 + CloseD(value1);
+end;
+value3=value2/50;
+plot5(value3, "60avg");
+}
+condition1 = Displace >= 0 or CurrentBar > AbsValue( Displace ) ;
+if condition1 then 
+begin
+	if var0[0] > var0[1] then
+	    begin
+	    Plot1[Displace]( var0[0], "Avg1" ) ;
+	    end
+	else
+	    begin
+	    plot2[Displace]( var0[0], "Avg2" ) ;
+	    end;
+
+
+	                  
+	if Displace <= 0 then 
+	begin
+	    condition1 = Price crosses over var0 ;
+	    if condition1 then
+			Alert( "Price crossing over average" ) 
+	    else 
+	        begin 
+		    condition1 =	Price crosses under var0 ;
+		    if condition1 then
+			Alert( "Price crossing under average" ) ;
+	        end ;
+	end;
+end ;

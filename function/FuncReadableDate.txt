@@ -1,0 +1,1 @@
+FuncReadableDate = (FormatDate("yyyy/MM/dd",datetojulian(D))+" "+FormatTime("HH:mm",eltimetodatetime(T))+" ");            

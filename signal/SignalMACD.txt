@@ -1,0 +1,31 @@
+inputs: FastLength( 12 ), SlowLength( 26 ), MACDLength( 9 ) ;
+variables: var0( 0 ), var1( 0 ), var2( 0 ) ;
+
+var0 = MACD( Close, FastLength, SlowLength ) ;
+var1 = XAverage( var0, MACDLength ) ;
+var2 = var0 - var1 ;
+
+if time > 0915 and time < 1325 then
+begin
+
+{if (var0 > var1 and var0 cross over 0) or (var0 cross over var1 and var0 > 0) then}
+if var0 > var1 and marketposition <= 0 then
+begin
+	 buy next bar at market;  
+end
+{else if (var0 < var1 and var0 cross under 0) or (var0 cross under var1 and var0 < 0) then}
+else if var0 <= var1 and  marketposition > 0 then 
+begin
+	sellshort next bar at market;
+end;
+
+end;
+
+
+if time > 1325 and marketposition > 0 then
+    sell next bar at market;
+
+if time > 1325 and marketposition < 0 then
+    buytocover next bar at market;
+
+ 

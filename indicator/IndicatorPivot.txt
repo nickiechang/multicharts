@@ -1,0 +1,26 @@
+Variables:H1(0),H2(0),H3(0),L1(0),L2(0),L3(0),BOP(0);
+
+if time > 1344 then begin
+  BOP = (highD(0) + LowD(0) + CloseD(0))/3;
+  H1 = BOP*2 - LowD(0);
+  H2 = BOP + (HighD(0) - LowD(0));
+  H3 = (BOP - LowD(0))*2 + HighD(0);
+  L1 = BOP*2 - HighD(0);
+  L2 = BOP - (HighD(0) - LowD(0));
+  L3 = (BOP - HighD(0))*2 + LowD(0);
+end else begin
+  BOP = (highD(1) + LowD(1) + CloseD(1))/3;
+  H1 = BOP*2 - LowD(1);
+  H2 = BOP + (HighD(1) - LowD(1));
+  H3 = (BOP - LowD(1))*2 + HighD(1);
+  L1 = BOP*2 - HighD(1);
+  L2 = BOP - (HighD(1) - LowD(1));
+  L3 = (BOP - HighD(1))*2 + LowD(1);
+end;
+
+plot1(H1, "H1");
+plot2(H2, "H2");
+plot3(H3, "H3");
+plot4(L1, "L1");
+plot5(L2, "L2");
+plot6(L3, "L3");

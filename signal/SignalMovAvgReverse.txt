@@ -1,0 +1,49 @@
+inputs:  Price( Close ), 
+         Length( 500 ), 
+         Buffer( 50 ) ,
+         StdMultiply( 2 ),
+         PreviousBars( 90);
+variables:  MovAvg( 0 ), 
+            StdDevValue( 0 ),
+            TopBand( 0 ),
+            BotBand( 0 ),
+            BuyPrice( 0 ),
+            SellPrice( 0 );
+            
+MovAvg = AverageFC( Price, Length) ;
+StdDevValue = StandardDev( MovAvg, Length, 1 );
+TopBand = MovAvg + StdDevValue*StdMultiply;
+BotBand = MovAvg - StdDevValue*StdMultiply;
+
+if StdDevValue*StdMultiply > Buffer then
+begin
+    BuyPrice = MovAvg+Buffer;
+    SellPrice = MovAvg-Buffer;
+end
+else
+begin
+    BuyPrice = TopBand;
+    SellPrice = BotBand;
+end;
+
+if close cross above BuyPrice and marketposition <= 0 then
+    buy next bar at market;
+    
+if close cross under SellPrice and marketposition >= 0 then
+    sellshort next bar at market;
+{
+if close > MovAvg and marketposition <= 0 then
+    buy next bar at BuyPrice stop;
+    
+if close < MovAvg and marketposition >= 0 then
+    sellshort next bar at SellPrice stop;
+}
+
+{
+if marketposition > 0 then
+    sell next bar at MovAvg stop;
+    
+if marketposition < 0 then
+    buytocover next bar at MovAvg stop;
+}
+    

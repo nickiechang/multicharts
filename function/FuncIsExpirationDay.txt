@@ -1,0 +1,1 @@
+FuncIsExpirationDay = (dayofweek(date)=3 and dayofmonth(date) > 14 and 22 > dayofmonth(date)) or date=1040127 or date=1070226 or date=1100617 or date=1100222; 

@@ -1,0 +1,68 @@
+inputs:  Price( Close ), 
+         Length( 1150 ), 
+         Buffer( 50 ) ,
+         StdMultiply( 2 ),
+         PreviousBars( 90);
+variables:  MovAvg( 0 ), 
+            StdDevValue( 0 ),
+            BullTrend( True ),
+            IsBalanceDay( True ),
+            TopBand( 0 ),
+            BotBand( 0 ),
+            BuyPrice( 0 ),
+            SellPrice( 0 ),
+            HBP( 0 ),
+            LBP( 0 ),
+            MP( 0 ),
+            ReadableDate("");
+
+//ReadableDate = (FormatDate("yyyy/MM/dd",datetojulian(D))+" "+FormatTime("HH:mm",eltimetodatetime(T))+" ");            
+ReadableDate = FuncReadableDate() ;
+{
+if Time <> Time[1] then
+    print(Date," ",Time," ",Time[1]," ",Close of Data2," ",Close[1] of Data2," ",Close[2] of Data2);
+}            
+MovAvg = AverageFC( Close, Length) of Data2;
+StdDevValue = StandardDev( AverageFC( Close, Length) of Data2  , Length, 1 );
+//StdDevValue = StandardDev( AverageFC( Close , Length) of Data2, Length, 1 );
+TopBand = MovAvg + StdDevValue*StdMultiply;
+BotBand = MovAvg - StdDevValue*StdMultiply;
+//TopBand = BollingerBand(close of data2, Length, 2);
+//BotBand = BollingerBand(close of data2, Length, -2);
+
+
+if StdDevValue*StdMultiply > Buffer then begin
+    BuyPrice = MovAvg+Buffer;
+    SellPrice = MovAvg-Buffer;
+end else begin
+    BuyPrice = TopBand;
+    SellPrice = BotBand;
+end;
+
+
+
+if Close of Data2 > BuyPrice and MP = 0 then begin
+    print(ReadableDate ,"close=",Close," sellshort  ",Close of Data2," Sdev=",StdDevValue," Top=",TopBand," MA=",MovAvg," Bot=",BotBand," BuyPrice=",BuyPrice);
+    MP = 1;
+    sellshort next bar at market;
+end;
+    
+if Close of Data2 < SellPrice and MP = 0 then begin
+    print(ReadableDate ,"close=",Close," sellshort  ",Close of Data2," Sdev=",StdDevValue," Top=",TopBand," MA=",MovAvg," Bot=",BotBand," SellPrice=",SellPrice );
+    MP = -1;
+    sellshort next bar at market;
+end;
+
+if Close of Data2 < MovAvg and MP > 0 then begin
+    print(ReadableDate ,"close=",Close," buytocover ",Close of Data2," Sdev=",StdDevValue," Top=",TopBand," MA=",MovAvg," Bot=",BotBand);
+    MP = 0;
+    buytocover next bar at market;
+end;
+    
+if Close of Data2 > MovAvg and MP < 0 then begin
+    print(ReadableDate ,"close=",Close," buytocover ",Close of Data2," Sdev=",StdDevValue," Top=",TopBand," MA=",MovAvg," Bot=",BotBand);
+    MP = 0;
+    buytocover next bar at market;
+end;
+
+

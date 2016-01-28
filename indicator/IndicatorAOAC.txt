@@ -1,0 +1,45 @@
+inputs: 
+	ShortLength( 5 ), 
+	LongLength( 60 ), 
+	Level( 0 ) ;
+	
+variables:   
+       MidValue( 0 ),
+       AO( 0 ),
+       AOP( 0 ),
+       AC( 0 ),
+       ACP( 0 );
+       
+       
+{MidValue = (High + Low)/2;}
+MidValue = Close;
+AO = AverageFC(MidValue,ShortLength) - AverageFC(MidValue,LongLength);
+AOP = IntPortion(AO/Close*1000);
+
+if AOP > AOP[1] then
+begin
+	{Plot1( AO, "AO", red );}  
+	Plot4( AOP, "AOP", red );  
+end
+else
+begin 
+	{Plot1( AO, "AO", green );}
+	Plot4( AOP, "AOP", green );
+end;
+	
+Plot2(Level,"Level");
+
+AC = AO - AverageFC(AO,ShortLength);
+ACP = AOP - AverageFC(AOP,ShortLength);
+{AC = AverageFC(AO - AverageFC(AO,ShortLength), ShortLength);}
+if ACP > ACP[1] then
+begin
+	{Plot3( AC, "AC", red );}  
+	Plot5( ACP, "ACP", red );  
+end
+else
+begin 
+	{Plot3( AC, "AC", green );}
+	Plot5( ACP, "ACP", green );
+end;
+ 

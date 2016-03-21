@@ -1,0 +1,73 @@
+inputs:  Price( Close ), 
+         Length( 300 ), 
+         Buffer( 0.0010 ) ,
+         StdMultiply( 2 );
+variables:  MovAvg( 0 ), 
+            StdDevValue( 0 ),
+            TopBand( 0 ),
+            BotBand( 0 ),
+            BuyPrice( 0 ),
+            SellPrice( 0 );
+            
+MovAvg = XAverage( Price, Length) ;
+//MovAvg = AverageFC( Price, Length) ;
+
+{
+StdDevValue = StandardDev( MovAvg, Length, 1 );
+TopBand = MovAvg + StdDevValue*StdMultiply;
+BotBand = MovAvg - StdDevValue*StdMultiply;
+
+if StdDevValue*StdMultiply > Buffer then
+begin
+    BuyPrice = MovAvg+Buffer;
+    SellPrice = MovAvg-Buffer;
+end
+else
+begin
+    BuyPrice = TopBand;
+    SellPrice = BotBand;
+end;
+}
+BuyPrice = MovAvg+Buffer;
+SellPrice = MovAvg-Buffer;
+
+if marketposition < 0 then begin
+    buy next bar at BuyPrice stop;
+    //print(close:7:4,"  ",MovAvg:7:4,"  ",marketposition,"  ",BuyPrice:7:4);
+end;
+    
+if marketposition > 0 then begin
+    sellshort next bar at SellPrice stop;
+    //print(close:7:4,"  ",MovAvg:7:4,"  ",marketposition,"  ",SellPrice:7:4);
+end;
+if close > MovAvg and marketposition = 0 then begin
+    buy next bar at BuyPrice stop;
+    //print(close:7:4,"  ",MovAvg:7:4,"  ",marketposition,"  ",BuyPrice:7:4);
+end;
+    
+if close < MovAvg and marketposition = 0 then begin
+    sellshort next bar at SellPrice stop;
+    //print(close:7:4,"  ",MovAvg:7:4,"  ",marketposition,"  ",SellPrice:7:4);
+end;
+{
+if close cross above BuyPrice and marketposition <= 0 then
+    buy next bar at market;
+    
+if close cross under SellPrice and marketposition >= 0 then
+    sellshort next bar at market;
+}
+{
+if close > MovAvg and marketposition <= 0 then
+    buy next bar at BuyPrice stop;
+    
+if close < MovAvg and marketposition >= 0 then
+    sellshort next bar at SellPrice stop;
+}
+{
+if marketposition > 0 then
+    sell next bar at MovAvg stop;
+    
+if marketposition < 0 then
+    buytocover next bar at MovAvg stop;
+}
+    

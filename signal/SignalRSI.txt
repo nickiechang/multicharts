@@ -1,0 +1,39 @@
+inputs:
+	Price( Close ),
+	Length( 1200 ),
+	LengthAvg( 910 ),
+//	OverSold( 30 ),
+//	OverBought( 70 ),
+	Buffer( 0.2 );
+//	OverSColor( Red ), 
+//	OverBColor( Red ) ;
+
+variables:  var0( 0 ), var1( 0 );
+
+var0 = RSI( Price, Length ) ;
+var1 = AverageFC( var0, LengthAvg) ;
+
+{ 
+condition1 = var0 crosses over OverSold ;
+if condition1 then
+	sellshort next bar at market
+else 
+begin 
+condition1 = var0 crosses under OverBought ;
+if condition1 then
+	buy next bar at market;
+end;
+}
+{
+if var0 crosses over var1 then
+    buy next bar at market;
+   
+if var0 crosses under var1 then
+    sellshort next bar at market;
+}
+
+if var0 > var1+Buffer and marketposition <= 0 then
+    buy next bar at market;
+
+if var0 < var1-Buffer and marketposition >= 0 then
+    sellshort next bar at market;

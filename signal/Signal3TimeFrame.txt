@@ -1,0 +1,99 @@
+inputs: TradeProfit(0.04),TradeStopLoss(0.01) ;
+
+Inputs: OverBought(95),OverSold(5),BuyLength(35),SellLength(45);
+
+vars: IsBalanceDay(False),MP(0),KB(0),KS(0);
+
+if DayOfMonth(Date) > 14 and DayOfMonth(Date) < 22 and DayOfWeek(Date)= 3 then IsBalanceDay = True else IsBalanceDay =False ;
+
+MP = MarketPosition ;
+
+{ ----- Preparation of Trade Setup -----}
+
+{------- 1st Time Frame 60 min ------}
+
+Condition1 = Macd(Close,12,26) of Data3 > Macd(Close,12,26)[1] of Data3 ;
+
+Condition2 = Macd(Close,12,26) of Data3 < Macd(Close,12,26)[1] of Data3 ;
+
+{------- 2nd Time Frame 12 mim ------}
+
+Condition3 = FastK(9) of Data2 < OverBought and SlowD(9)of Data2 < OverBought ;
+
+Condition4 = FastK(9) of Data2 > OverSold and SlowD(9)of Data2 > OverSold ;
+
+{------- 3rd Time Frame 5 minutes ------}
+
+Condition5 = Close of Data1 > Average(Close of Data1,BuyLength) ;
+
+Condition6 = Close of Data1 < Average(Close of Data1,SellLength) ;
+
+if Date <> Date[1] then Begin
+
+KB = 0 ;
+
+KS = 0 ;
+
+end;
+
+if (KB+KS)< 1 then Begin
+
+if Condition1 and Condition3 and Condition5 and KB < 1 then Begin
+
+buy next bar at Market;
+
+KB = KB +1 ;
+
+end;
+
+if Condition2 and Condition4 and Condition6 and KS < 1 then Begin
+
+sellshort next bar at Market;
+
+KS = KS +1 ;
+
+end;
+
+end;
+
+if MP > 0 then Begin
+
+if MP > 0 and High > EntryPrice*(1 + TradeProfit) then sell next bar at EntryPrice*(1 + TradeProfit) stop;
+
+if MP > 0 and Low < EntryPrice*(1 - TradeStopLoss) then sell next bar at EntryPrice *(1- TradeStopLoss) stop;
+
+end;
+
+{ ----- Exit of Short Trade -----}
+
+if MP < 0 then Begin
+
+if MP < 0 and Low < EntryPrice*(1 - TradeProfit) then buytocover next bar at EntryPrice*(1 - TradeProfit) stop;
+
+if MP < 0 and High > EntryPrice*(1 + TradeStopLoss) then buytocover next bar at EntryPrice*(1 + TradeStopLoss) stop;
+
+end;
+
+{ ----- Balance on DayClose -----}
+
+if MP <> 0 and time > 1335 then Begin
+
+if MP > 0 then sell next bar at market;
+
+if MP < 0 then buytocover next bar at market;
+
+end;
+
+{ ----- Balance on Monthly BalanceDay -----}
+
+if IsBalanceDay then Begin
+
+if MP <> 0 and time= 1315 then Begin
+
+if MP > 0 then sell next bar at market ;
+
+if MP < 0 then buytocover next bar at market ;
+
+end ;
+
+end;

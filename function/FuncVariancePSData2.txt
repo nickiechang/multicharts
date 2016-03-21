@@ -1,0 +1,24 @@
+inputs: 
+	PriceValue( numericseries ), 
+	Len( numericsimple ), 
+	DataType( numericsimple ) ;                                                
+	                                                                                  
+	             
+
+variables: 
+	var0( 0 ), 
+	var1( 0 ),
+	var2( 0 ) ;
+
+FuncVariancePSData2 = 0 ;
+var0 = Iff( DataType = 1, Len, Len - 1 ) ;
+if var0 > 0 then 
+	begin
+	var2 = Average( PriceValue, Len ) ;
+	var1 = 0 ;
+	for Value1 = 0 to Len - 1 
+		begin
+		var1 = var1 + Square( PriceValue[Value1] - var2 ) ;
+		end ;
+	FuncVariancePSData2 = var1 / var0 ;
+	end ;

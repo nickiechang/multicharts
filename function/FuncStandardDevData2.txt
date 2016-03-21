@@ -1,0 +1,12 @@
+inputs: 
+	PriceValue( numericseries ), 
+	Len( numericsimple ), 
+	DataType( numericsimple ) ;                                                
+	                                                                            
+	             
+
+Value1 = FuncVariancePSData2( PriceValue, Len, DataType ) of Data2 ;
+if Value1 > 0 then 
+	FuncStandardDevData2 = SquareRoot( Value1 ) 
+else 
+	FuncStandardDevData2 = 0 ;

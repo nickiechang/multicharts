@@ -1,0 +1,45 @@
+inputs:
+	Price( Close ),
+	Length( 1200 ),
+	LengthAvg( 910 ),
+//	OverSold( 30 ),
+//	OverBought( 70 ),
+	Buffer( 0.2 );
+//	OverSColor( Red ), 
+//	OverBColor( Red ) ;
+
+variables:  var0( 0 ), var1( 0 );
+
+var0 = RSI( Price, Length ) ;
+var1 = AverageFC( var0, LengthAvg) ;
+
+ 
+Plot1( var0, "RSI" ) ;
+//Plot2( OverBought, "OverBot" ) ;
+//Plot3( OverSold, "OverSld" ) ;
+Plot4( var1, "RSIAVG" );
+
+if var0 > var1+Buffer then
+	SetPlotColor( 4, red ) ;
+
+if var0 < var1-Buffer then
+	SetPlotColor( 4, green ) ;
+
+{                  
+if var1 > OverBought then 
+	SetPlotColor( 4, OverBColor ) 
+else if var1 < OverSold then 
+	SetPlotColor( 4, OverSColor ) ;
+end;
+}
+{
+condition1 = var0 crosses over OverSold ;
+if condition1 then
+	Alert( "Indicator exiting oversold zone" )
+else 
+begin 
+condition1 = var0 crosses under OverBought ;
+if condition1 then
+	Alert( "Indicator exiting overbought zone" ) ;
+end;
+}
